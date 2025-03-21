@@ -1,4 +1,3 @@
-# Django-Food-ordering-system
 # 🛒 Online Food Ordering System  
 
 ## 📌 Overview  
@@ -52,24 +51,31 @@ This is an **online food ordering system** built using **Django** that allows us
 - **Other Tools:** Django ORM, Pandas (for Excel import), Django Messages  
 - **Deployment:** Compatible with **Heroku / AWS / DigitalOcean**  
 
-## Usage
-Uploading Menu via Excel (Admin Only)
-1.Navigate to the Admin Panel (/admin).
-2.Upload an Excel file with food item details (name, category, price, description).
-3.System validates and adds the items to the database.
+---
 
-Placing an Order
-1.Browse food items and add them to the cart.
-2.Go to the cart page, adjust quantities, and proceed to checkout.
-3.Order gets placed, and the order history is available.
+## ⚙️ Usage  
 
-Canceling an Order
-1.Users can cancel an order within 2 minutes after placing it.
-2.The status updates to "Canceled" instead of deleting the order.
+### **Uploading Menu via Excel (Admin Only)**  
+1. Navigate to the Admin Panel (`/admin`).  
+2. Upload an Excel file with food item details (**name, category, price, description**).  
+3. The system validates the file and adds the items to the database.  
 
+### **Placing an Order**  
+1. Browse food items and add them to the cart.  
+2. Go to the cart page, adjust quantities, and proceed to checkout.  
+3. The order is placed, and order history becomes available.  
 
-🌟 Future Enhancements
-✅ Payment Integration (Stripe, Razorpay, PayPal)
-✅ Live Order Tracking
-✅ User Reviews & Ratings for Food Items
-✅ Admin Dashboard for Order & Menu Management
+### **Canceling an Order**  
+1. Users can cancel an order within **2 minutes** of placing it.  
+2. The order status updates to **"Canceled"** instead of being deleted.  
+
+---
+
+## 🔮 Future Enhancements  
+
+✅ **Payment Integration** (Stripe, Razorpay, PayPal)  
+✅ **Live Order Tracking**  
+✅ **User Reviews & Ratings for Food Items**  
+✅ **Admin Dashboard for Order & Menu Management**  
+
+---
