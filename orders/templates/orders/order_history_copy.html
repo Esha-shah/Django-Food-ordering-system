@@ -1,0 +1,70 @@
+{% extends 'orders/base.html' %}
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center my-4">Order History</h2>
+
+    <!-- Bootstrap Nav Tabs (Dynamic) -->
+    <ul class="nav nav-tabs" id="orderTabs">
+        {% for status in unique_statuses %}
+            <li class="nav-item">
+                <a class="nav-link {% if forloop.first %}active{% endif %}" 
+                   id="{{ status|lower }}-tab" 
+                   data-bs-toggle="tab" 
+                   href="#{{ status|lower }}">
+                    {{ status }} Orders
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="tab-content mt-3">
+        {% for status in unique_statuses %}
+            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+                 id="{{ status|lower }}">
+                {% with filtered_orders=orders|dictsortreversed:"created_at" %}
+                    {% if filtered_orders %}
+                        {% for order in filtered_orders %}
+                            {% if order.status == status %}
+                                <div class="card mb-4">
+                                    <div class="card-header text-white 
+                                        {% if status == 'Completed' %}bg-success{% elif status == 'Cancelled' %}bg-danger{% else %}bg-dark{% endif %}">
+                                        <h5>Order ID: {{ order.id }} | Date: {{ order.created_at|date:"F d, Y H:i" }}</h5>
+                                        <h6>Status: {{ order.status }}</h6>
+                                        <h6>Total Amount: ${{ order.total_amount }}</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if order.orderhistory_set.all %}
+                                            <table class="table table-bordered">
+                                                <thead class="table-secondary">
+                                                    <tr>
+                                                        <th>Item</th>
+                                                        <th>Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in order.orderhistory_set.all %}
+                                                        <tr>
+                                                            <td>{{ item.item.name }}</td>
+                                                            <td>{{ item.quantity }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% else %}
+                                            <p class="text-center">No items found for this order.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center">No {{ status }} orders found.</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

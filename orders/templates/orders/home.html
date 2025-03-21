@@ -1,0 +1,63 @@
+{% extends 'orders/base.html' %}
+
+{% block title %}Home - Food Ordering{% endblock %}
+
+{% block content %}
+{% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success
+                             {% elif message.tags == 'warning' %}alert-danger
+                             {% elif message.tags == 'error' %}alert-danger
+                             {% else %}alert-info{% endif %}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+<!-- {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %} -->
+
+    <div class="text-center my-4">
+        <h1 class="fw-bold">Welcome to Our Restaurant</h1>
+        <img src="{{ MEDIA_URL }}restaurant_logo.png" alt="Restaurant Logo" class="img-fluid mt-3" style="width: 150px;">
+    </div>
+
+     <!-- Search Bar -->
+     <div class="text-center mt-4 mb-4">
+        <form method="GET" action="{% url 'orders:cat_menu' %}" class="d-flex justify-content-center">
+            <input type="text" name="name" class="form-control w-50 me-2" placeholder="Search for a dish...">
+            <button type="submit" class="btn btn-warning">Search</button>
+        </form>
+    </div>
+</div>
+    <div class="container">
+        <h2 class="mb-3">Menu Categories</h2>
+        <div class="list-group">
+            {% for category in categories %}
+                <a href="{% url 'orders:cat_menu' %}?category={{ category.name }}" class="list-group-item list-group-item-action" onclick="resetFiltersAndSetCategory('{{ category.name }}')">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!-- Search Bar
+        <div class="text-center mt-4">
+            <form method="GET" action="{% url 'orders:cat_menu' %}" class="d-flex justify-content-center">
+                <input type="text" name="name" class="form-control w-50 me-2" placeholder="Search for a dish...">
+                <button type="submit" class="btn btn-warning">Search</button>
+            </form>
+        </div>
+    </div> -->
+
+    <script>
+        function resetFiltersAndSetCategory(categoryName) {
+            localStorage.removeItem('menuFilters');  // Clear all previous filters
+            localStorage.setItem('menuFilters', `category=${categoryName}`); // Save selected category
+        }
+    </script>
+{% endblock %}

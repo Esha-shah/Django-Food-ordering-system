@@ -1,0 +1,103 @@
+{% extends 'orders/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Your Cart</h2>
+
+    {% if cart_items %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="cart-items-container">
+                {% for item in cart_items %}
+                    <tr data-cart-id="{{ item.id }}">
+                        <td>{{ item.food_item.name }}</td>
+                        <td>
+                            <input type="number" class="form-control cart-quantity" value="{{ item.quantity }}" min="1" data-item-id="{{ item.id }}">
+                        </td>
+                        <td>${{ item.food_item.price }}</td>
+                        <td class="total-price">${{ item.total_price|floatformat:2 }}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm remove-item" data-item-id="{{ item.id }}">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Total Amount: $<span id="total-amount">{{ total_amount|floatformat:2 }}</span></h4>
+
+        <div class="text-center my-3">
+            <a href="{% url 'orders:cat_menu' %}" class="btn btn-primary">
+                ← Back to Menu
+            </a>
+            <a href="{% url 'orders:place_order' %}" class="btn btn-success">Proceed to Payment</a>
+        </div>
+        
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+</div>
+
+<!-- jQuery for AJAX -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Update Quantity
+        $(".cart-quantity").on("change", function() {
+            let itemId = $(this).data("item-id");
+            let quantity = $(this).val();
+            let row = $(this).closest("tr");
+
+            $.ajax({
+                type: "POST",
+                url: "/update-cart/" + itemId + "/",
+                data: {
+                    quantity: quantity,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    row.find(".total-price").text(`$${response.total_price}`);
+                    $("#total-amount").text(response.total_amount);
+                },
+                error: function() {
+                    alert("Error updating cart.");
+                }
+            });
+        });
+
+        // Remove Item
+        $(".remove-item").on("click", function() {
+            let itemId = $(this).data("item-id");
+            let row = $(this).closest("tr");
+
+            $.ajax({
+                type: "POST",
+                url: "/remove-from-cart/" + itemId + "/",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    row.remove();
+                    $("#total-amount").text(response.total_amount);
+
+                    if (response.cart_count === 0) {
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert("Error removing item.");
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'orders/base.html' %}
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center my-4">Order History</h2>
+
+    {% if orders %}
+        {% for order in orders %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5>Order ID: {{ order.id }} | Date: {{ order.created_at|date:"F d, Y H:i" }}</h5>
+                    <h6>Status: {{ order.status }}</h6>
+                    <h6>Total Amount: ${{ order.total_amount }}</h6>
+                </div>
+                <div class="card-body">
+                    {% if order.orderhistory_set.all %}
+                        <table class="table table-bordered">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.orderhistory_set.all %}
+                                    <tr>
+                                        <td>{{ item.item.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-center">No items found for this order.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-center">No past orders found.</p>
+    {% endif %}
+</div>
+{% endblock %}

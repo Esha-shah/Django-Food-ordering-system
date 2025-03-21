@@ -1,0 +1,210 @@
+{% extends 'orders/base.html' %}
+{% load crispy_forms_tags %}  
+
+{% block title %}Category Menu - Food Ordering{% endblock %}
+
+{% block content %}
+    <div class="text-center my-4">
+        <h1 class="fw-bold">Category-Specific Menu</h1>
+    </div>
+
+    <!-- View Cart Button -->
+    <div class="container text-end mb-3">
+        <a id="view-cart-btn" href="{% url 'orders:cart' %}" class="btn btn-warning">
+            🛒 View Cart (<span id="cart-count">{{ cart_items_count }}</span>)
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="container mb-4">
+        <form id="filter-form" method="GET" class="text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    {{ filter.form|crispy }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-2">Apply Filters</button>
+        </form>
+    </div>
+
+    <!-- Food Items -->
+    <div class="container">
+        <div class="row" id="food-items-container">
+            {% for item in food_items %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm">
+                        <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text">{{ item.description }}</p>
+                            <p class="fw-bold text-success">${{ item.price }}</p>
+
+                            <!-- AJAX Form for Add to Cart -->
+                            <form class="add-to-cart-form" data-food-id="{{ item.id }}">
+                                {% csrf_token %}
+                                <div class="input-group mb-2">
+                                    <input type="number" name="quantity" value="1" min="1" class="form-control quantity-input" style="max-width: 80px;">
+                                    <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center">No food items found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link pagination-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- jQuery for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Get category from URL when coming from home page
+            let urlParams = new URLSearchParams(window.location.search);
+            let selectedCategory = urlParams.get("category");
+
+            if (selectedCategory) {
+                localStorage.removeItem("menuFilters"); // Clear previous filters
+                localStorage.setItem("menuFilters", `category=${selectedCategory}`);
+            }
+
+            // Restore filters from localStorage when coming back to menu page
+            let savedFilters = localStorage.getItem("menuFilters");
+            if (savedFilters) {
+                let params = new URLSearchParams(savedFilters);
+                params.forEach((value, key) => {
+                    $(`[name="${key}"]`).val(value);
+                });
+            }
+
+            function applyFilters(formData, updateURL = true) {
+                if (updateURL) {
+                    localStorage.setItem("menuFilters", formData);
+                }
+
+                $.ajax({
+                    type: "GET",
+                    url: window.location.pathname,
+                    data: formData,
+                    success: function(response) {
+                        let newContent = $(response).find("#food-items-container").html();
+                        $("#food-items-container").html(newContent);
+
+                        let newPagination = $(response).find(".pagination").html();
+                        $(".pagination").html(newPagination);
+                    },
+                    error: function() {
+                        alert("Error applying filters.");
+                    }
+                });
+            }
+
+            // Handle filter form submission
+            $("#filter-form").submit(function(event) {
+                event.preventDefault();
+                let formData = $(this).serialize();
+                applyFilters(formData);
+            });
+
+            // Preserve filters when clicking pagination links
+            $(document).on("click", ".pagination-link", function(event) {
+                event.preventDefault();
+                let pageUrl = $(this).attr("href");
+                let savedFilters = localStorage.getItem("menuFilters") || "";
+
+                $.ajax({
+                    type: "GET",
+                    url: pageUrl + (savedFilters ? "&" + savedFilters : ""),
+                    success: function(response) {
+                        let newContent = $(response).find("#food-items-container").html();
+                        $("#food-items-container").html(newContent);
+
+                        let newPagination = $(response).find(".pagination").html();
+                        $(".pagination").html(newPagination);
+                    },
+                    error: function() {
+                        alert("Error loading page.");
+                    }
+                });
+            });
+
+            $(document).ready(function () {
+                // Ensure "View Cart" button retains filters when coming back
+                $("#view-cart-btn").click(function (event) {
+                    let savedFilters = localStorage.getItem("menuFilters");
+                    if (savedFilters) {
+                        localStorage.setItem("returnToMenu", window.location.pathname + "?" + savedFilters);
+                    }
+                });
+            
+                // If returning from cart, apply saved filters
+                let returnToMenu = localStorage.getItem("returnToMenu");
+                if (returnToMenu) {
+                    localStorage.removeItem("returnToMenu");
+                    window.location.href = returnToMenu; // Redirect to the menu with filters
+                }
+            });
+
+            // AJAX for Adding to Cart
+            $(document).on("submit", ".add-to-cart-form", function(event) {
+                event.preventDefault();
+
+                let form = $(this);
+                let foodId = form.data("food-id");
+                let quantity = form.find(".quantity-input").val();
+                let csrfToken = form.find("input[name=csrfmiddlewaretoken]").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: `/add-to-cart/${foodId}/`,
+                    data: {
+                        quantity: quantity,
+                        csrfmiddlewaretoken: csrfToken
+                    },
+                    success: function(response) {
+                        $("#cart-count").text(response.cart_count);
+                        form.find(".btn").text("Added ✅").prop("disabled", true);
+                        setTimeout(() => {
+                            form.find(".btn").text("Add to Cart").prop("disabled", false);
+                        }, 2000);
+                    },
+                    error: function(xhr) {
+                        alert("Error adding to cart!");
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

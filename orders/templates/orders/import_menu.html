@@ -1,0 +1,49 @@
+{% extends 'orders/base.html' %}
+
+{% block title %}Import Menu - Admin{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Import Menu from Excel</h2>
+
+        <!-- Display messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert 
+                    {% if message.tags == 'success' %}alert-success
+                    {% elif message.tags == 'warning' or message.tags == 'error' %}alert-danger
+                    {% else %}alert-info{% endif %}" 
+                    role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+
+        <div class="mt-4">
+            <h5>Instructions:</h5>
+            <ul>
+                <li>Ensure your Excel file has the following columns:</li>
+                <code>Name, Category, Price, Description, Is_Vegetarian, Is_Vegan, Image_Path</code>
+                <li>All column names should match exactly (case-sensitive).</li>
+                <li><strong>Price</strong> should be a number (e.g., 9.99).</li>
+                <li><strong>Is_Vegetarian</strong> and <strong>Is_Vegan</strong> should be <code>TRUE</code> or <code>FALSE</code>.</li>
+                <li>If an item already exists, it will be skipped to prevent duplication.</li>
+                <li><strong>Image_Path</strong> should be a valid relative path from the media directory.</li>
+                <li>If errors exist, an error file will be generated with problematic cells highlighted.</li>
+            </ul>
+        </div>
+
+        {% if error_file %}
+            <div class="mt-3">
+                <p class="text-danger">Some errors were found in your file. Please review and correct them:</p>
+                <a href="{{ error_file }}" class="btn btn-danger">Download Error File</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

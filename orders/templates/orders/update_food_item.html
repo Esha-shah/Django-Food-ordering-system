@@ -1,0 +1,21 @@
+{% extends 'orders/base.html' %}
+
+{% load crispy_forms_tags %}  {# Load crispy forms #}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="text-center">Update Food Item: {{ food_item.name }}</h2>
+
+        <div class="card p-4 shadow">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form|crispy }}  {# Render form with crispy styling #}
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{% url 'orders:manage_menu' %}" class="btn btn-secondary">Back to Menu</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

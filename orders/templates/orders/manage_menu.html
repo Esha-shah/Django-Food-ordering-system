@@ -1,0 +1,92 @@
+{% extends 'orders/base.html' %}
+{% load crispy_forms_tags %}  <!-- Load Crispy Forms -->
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="text-center">Manage Food Menu</h2>
+        <!-- Display success or error messages -->
+        {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success
+                             {% elif message.tags == 'warning' %}alert-danger
+                             {% elif message.tags == 'error' %}alert-danger
+                             {% else %}alert-info{% endif %}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+<!-- Existing Categories Section -->
+<div class="mb-5">
+<h3>Categories</h3>
+    <ul class="list-group mb-3">
+        {% for category in categories %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ category.name }}
+                <form method="POST" action="{% url 'orders:delete_category' category.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-muted">No categories available.</li>
+        {% endfor %}
+    </ul>
+    </div>
+
+<!-- Add New Category Form -->
+<div class="mb-5">
+<h4>Add New Category</h4>
+<form method="POST" action="{% url 'orders:manage_menu' %}">
+    {% csrf_token %}
+    {{ category_form|crispy }}
+    <button type="submit" class="btn btn-primary">Add Category</button>
+</form>
+</div>
+
+        <!-- Add New Food Item Button -->
+        <div class="text-center mb-3">
+            <a href="{% url 'orders:add_food_item' %}" class="btn btn-success">Add New Food Item</a>
+            <a href="{% url 'orders:import_menu' %}" class="btn btn-success">Import Menu From Excel</a>
+        </div>
+
+    
+    {% for category in categories %}
+    <h3 class="mt-4">{{ category.name }}</h3> <!-- Category Title -->
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped category-table">
+            <colgroup>
+                <col style="width: 40%;"> <!-- Name Column -->
+                <col style="width: 30%;"> <!-- Price Column -->
+                <col style="width: 30%;"> <!-- Actions Column -->
+            </colgroup>
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for food in food_items %}
+                    {% if food.category == category %}
+                        <tr>
+                            <td>{{ food.name }}</td>
+                            <td>${{ food.price }}</td>
+                            <td>
+                                <a href="{% url 'orders:update_food_item' food.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                <a href="{% url 'orders:delete_food_item' food.id %}" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% empty %}
+    <p class="text-center text-muted">No categories available.</p>
+{% endfor %}
+
+    
+{% endblock %}

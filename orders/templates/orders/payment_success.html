@@ -1,0 +1,18 @@
+{% extends 'orders/base.html' %}
+
+{% block content %}
+<div class="alert alert-success mt-4">
+    <h2>Payment Successful</h2>
+    <p>Your order has been placed successfully!</p>
+
+    <div class="d-flex gap-2">
+    <form action="{% url 'orders:cancel_order' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Cancel Order</button>
+    </form>
+
+    <a href="{% url 'orders:home' %}" class="btn btn-primary">Back to Home</a>
+</div>
+</div>
+{% endblock %}
+
