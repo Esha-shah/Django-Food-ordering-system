@@ -79,3 +79,46 @@ This is an **online food ordering system** built using **Django** that allows us
 ✅ **Admin Dashboard for Order & Menu Management**  
 
 ---
+
+
+## Installation & Setup  
+
+1. **Clone the repository**  
+   ```sh  
+   git clone https://github.com/yourusername/blogging-platform.git  
+   cd blogging-platform  
+   ```  
+
+2. **Create a virtual environment**  
+   ```sh  
+   python -m venv env  
+   source env/bin/activate  # MacOS/Linux  
+   env\Scripts\activate  # Windows  
+   ```  
+
+3. **Install dependencies**  
+   ```sh  
+   pip install -r requirements.txt  
+   ```  
+
+4. **Apply migrations**  
+   ```sh  
+   python manage.py migrate  
+   ```  
+
+5. **Create a superuser**  
+   ```sh  
+   python manage.py createsuperuser  
+   ```  
+
+6. **Run the server**  
+   ```sh  
+   python manage.py runserver  
+   ```  
+
+7. **Open in your browser**  
+   - Go to `http://127.0.0.1:8000/`  
+
+## License  
+
+This project is licensed under the MIT License.  
